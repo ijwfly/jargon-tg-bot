@@ -35,7 +35,7 @@ throttling_dispatcher = ThrottlingDispatcher()
 async def get_jargon_for_query(user_id, user_query):
     text = user_query
     if not text or len(text) <= MIN_INPUT_LENGTH:
-        return 'Напиши что-нибудь'
+        return
 
     if len(text) > MAX_INPUT_LENGTH:
         return 'Слишком длинный текст'
@@ -46,7 +46,7 @@ async def get_jargon_for_query(user_id, user_query):
 
     is_last = await throttling_dispatcher.wait_for_last_request(user_id)
     if not is_last:
-        return '-'
+        return
 
     jargon = await get_jargon(BASE_PROMPT, text)
     jargon_cache[user_query] = jargon
@@ -57,6 +57,9 @@ async def get_jargon_for_query(user_id, user_query):
 async def inline_handler(inline_query: InlineQuery):
     user_query = inline_query.query.strip().lower()
     jargon_text = await get_jargon_for_query(inline_query.from_user.id, user_query)
+    if not jargon_text:
+        await bot.answer_inline_query(inline_query.id, results=[], cache_time=TELEGRAM_CACHE_TIME)
+        return
 
     input_content = InputTextMessageContent(message_text=jargon_text)
     result_id: str = hashlib.md5(jargon_text.encode()).hexdigest()
