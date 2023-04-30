@@ -1,0 +1,13 @@
+version: "3"
+services:
+  worker:
+    build: .
+    restart: always
+    environment:
+      PYTHONUNBUFFERED: 1
+      TELEGRAM_TOKEN: "YOUR_TELEGRAM_TOKEN"
+      OPENAI_API_KEY: "YOUR_OPENAI_API_KEY"
+      BASE_PROMPT: "Перепиши текст в стиле токсичного эффективного менеджера. Сохрани стиль. В ответе только текст."
+
+    volumes:
+      - .:/usr/src/app
